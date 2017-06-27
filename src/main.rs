@@ -8,6 +8,7 @@
 // `Cargo.toml`!
 #[macro_use]
 extern crate error_chain;
+extern crate clap;
 
 // We'll put our errors in an `errors` module, and other modules in
 // this crate will `use errors::*;` to get access to everything
@@ -19,6 +20,8 @@ mod errors {
 
 
 use errors::*;
+use clap::{Arg, App, SubCommand};
+
 
 fn main() {
     if let Err(ref e) = run() {
@@ -42,9 +45,21 @@ fn main() {
 // `errors` module. It is a typedef of the standard `Result` type
 // for which the error type is always our own `Error`.
 fn run() -> Result<()> {
+     let matches = App::new("My Super Program")
+                          .version("1.0")
+                          .author("Kevin K. <kbknapp@gmail.com>")
+                          .about("Does awesome things")
+                          .subcommand(SubCommand::with_name("contacts")
+                                      .about("loads contacts"))
+                            .subcommand(SubCommand::with_name("args")
+                                      .about("check args"))
+                          .get_matches();
 
-    // adds error to the list of errors
-    get_contacts().chain_err(|| "failed to get contacts")?;
+    if let Some(matches) = matches.subcommand_matches("contacts") {
+        // adds error to the list of errors
+        get_contacts().chain_err(|| "failed to get contacts")?;
+    }
+
 
     // loses inner error
     // if get_contacts().is_err() {
@@ -59,6 +74,7 @@ fn run() -> Result<()> {
 
 
 fn get_contacts() -> Result<()> {
+    println!("get_contacts");
     use std::fs::File;
     // This operation will fail
     File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
@@ -66,6 +82,7 @@ fn get_contacts() -> Result<()> {
 }
 
 fn get_args() -> Result<()> {
+    println!("get_args");
     use std::env;
 
     if env::args_os().count() < 2 {
