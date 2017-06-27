@@ -20,7 +20,7 @@ mod errors {
 
 
 use errors::*;
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App, SubCommand, ArgMatches};
 
 
 fn main() {
@@ -45,30 +45,31 @@ fn main() {
 // `errors` module. It is a typedef of the standard `Result` type
 // for which the error type is always our own `Error`.
 fn run() -> Result<()> {
-     let matches = App::new("My Super Program")
-                          .version("1.0")
-                          .author("Kevin K. <kbknapp@gmail.com>")
-                          .about("Does awesome things")
-                          .subcommand(SubCommand::with_name("contacts")
-                                      .about("loads contacts"))
-                            .subcommand(SubCommand::with_name("args")
-                                      .about("check args"))
-                          .get_matches();
+    let matches = App::new("My Super Program")
+        .version("1.0")
+        .author("Kevin K. <kbknapp@gmail.com>")
+        .about("Does awesome things")
+        .subcommand(SubCommand::with_name("contacts").about("loads contacts"))
+        .subcommand(SubCommand::with_name("args")
+                            .about("check args")
+                            .arg(Arg::with_name("foo")
+                                .short("f")
+                                .long("foo")                                
+                                .value_name("FOO")
+                                .required(true))
+                            .arg(Arg::with_name("bar")
+                                .short("b")
+                                .long("bar")
+                                .default_value("bar")
+                                .value_name("BAR"))
+                                )
+        .get_matches();
 
-    if let Some(matches) = matches.subcommand_matches("contacts") {
-        // adds error to the list of errors
-        get_contacts().chain_err(|| "failed to get contacts")?;
+    match matches.subcommand() {
+        ("contacts", _) => get_contacts().chain_err(|| "failed to get contacts!"),
+        ("args", Some(m)) => get_args(m).chain_err(|| "failed to parse args!"),
+        _ => Ok(()),
     }
-
-
-    // loses inner error
-    // if get_contacts().is_err() {
-    //     bail!("error!");
-    // }
-
-    get_args().chain_err(|| "failed to get args")?;
-
-    Ok(())
 }
 
 
@@ -81,17 +82,16 @@ fn get_contacts() -> Result<()> {
     Ok(())
 }
 
-fn get_args() -> Result<()> {
-    println!("get_args");
-    use std::env;
+fn get_args(matches: &ArgMatches) -> Result<()> {
+    println!("is foo present? {}", matches.is_present("foo"));
 
-    if env::args_os().count() < 2 {
-        bail!("no args passed, usage: errorclap foo bar"); // early exit
+    if let Some(foo) = matches.value_of("foo") {
+        println!("and has a value of {}", foo);
+    } else {
+        bail!("foo must have a value!");
     }
 
-    for args in env::args_os() {
-        println!("\t{:?}", args);
-    }
+    println!("value of bar: {}", matches.value_of("bar").unwrap());
 
     Ok(())
 }
