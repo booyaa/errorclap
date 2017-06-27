@@ -45,10 +45,10 @@ fn main() {
 // `errors` module. It is a typedef of the standard `Result` type
 // for which the error type is always our own `Error`.
 fn run() -> Result<()> {
-    let matches = App::new("My Super Program")
+    let matches = App::new("👏 clap yo error chains ⛓")
         .version("1.0")
-        .author("Kevin K. <kbknapp@gmail.com>")
-        .about("Does awesome things")
+        .author("booyaa <email@example.com>")
+        .about("Robert'); DROP TABLE STUDENTS; -- seriously you don't clean you input?")
         .subcommand(SubCommand::with_name("contacts").about("loads contacts"))
         .subcommand(SubCommand::with_name("args")
                             .about("check args")
