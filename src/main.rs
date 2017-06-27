@@ -14,8 +14,9 @@ extern crate error_chain;
 // `error_chain!` creates.
 mod errors {
     // Create the Error, ErrorKind, ResultExt, and Result types
-    error_chain! { }
+    error_chain!{}
 }
+
 
 use errors::*;
 
@@ -41,19 +42,34 @@ fn main() {
 // `errors` module. It is a typedef of the standard `Result` type
 // for which the error type is always our own `Error`.
 fn run() -> Result<()> {
+
+    // adds error to the list of errors
+    get_contacts().chain_err(|| "failed to get contacts")?;
+
+    // loses inner error
+    // if get_contacts().is_err() {
+    //     bail!("error!");
+    // }
+
+    get_args().chain_err(|| "failed to get args")?;
+
+    Ok(())
+}
+
+
+
+fn get_contacts() -> Result<()> {
     use std::fs::File;
-
     // This operation will fail
-    println!("checking for file...");
-    File::open("contacts")
-        .chain_err(|| "unable to open contacts file")?;
+    File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
+    Ok(())
+}
 
-
-    println!("checking for args...");
+fn get_args() -> Result<()> {
     use std::env;
 
     if env::args_os().count() < 2 {
-        bail!("no args!");
+        bail!("no args passed, usage: errorclap foo bar"); // early exit
     }
 
     for args in env::args_os() {
@@ -62,4 +78,3 @@ fn run() -> Result<()> {
 
     Ok(())
 }
-

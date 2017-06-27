@@ -5,3 +5,4 @@ authors = ["booyaa <booyaabooyaabooyaa@gmail.com>"]
 
 [dependencies]
 error-chain = "0.10.0"
+clap = "2.25.0"
