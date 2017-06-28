@@ -20,6 +20,8 @@ mod errors {
 
 mod helpers {
     use errors::*;
+    use clap::{ArgMatches};
+
 
     pub fn get_contacts() -> Result<()> {
         println!("get_contacts");
@@ -28,10 +30,24 @@ mod helpers {
         File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
         Ok(())
     }
+
+    pub fn get_args(matches: &ArgMatches) -> Result<()> {
+    println!("is foo present? {}", matches.is_present("foo"));
+
+    if let Some(foo) = matches.value_of("foo") {
+        println!("and has a value of {}", foo);
+    } else {
+        bail!("foo must have a value!");
+    }
+
+    println!("value of bar: {}", matches.value_of("bar").unwrap());
+
+    Ok(())
+}
 }
 
 use errors::*;
-use clap::{Arg, App, SubCommand, ArgMatches};
+use clap::{Arg, App, SubCommand};
 
 
 fn main() {
@@ -78,7 +94,7 @@ fn run() -> Result<()> {
 
     match matches.subcommand() {
         ("contacts", _) => helpers::get_contacts().chain_err(|| "failed to get contacts!"),
-        ("args", Some(m)) => get_args(m).chain_err(|| "failed to parse args!"),
+        ("args", Some(m)) => helpers::get_args(m).chain_err(|| "failed to parse args!"),
         _ => Ok(()),
     }
 }
@@ -87,16 +103,3 @@ fn run() -> Result<()> {
 
 
 
-fn get_args(matches: &ArgMatches) -> Result<()> {
-    println!("is foo present? {}", matches.is_present("foo"));
-
-    if let Some(foo) = matches.value_of("foo") {
-        println!("and has a value of {}", foo);
-    } else {
-        bail!("foo must have a value!");
-    }
-
-    println!("value of bar: {}", matches.value_of("bar").unwrap());
-
-    Ok(())
-}
