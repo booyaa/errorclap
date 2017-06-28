@@ -18,6 +18,17 @@ mod errors {
     error_chain!{}
 }
 
+mod helpers {
+    use errors::*;
+
+    pub fn get_contacts() -> Result<()> {
+        println!("get_contacts");
+        use std::fs::File;
+        // This operation will fail
+        File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
+        Ok(())
+    }
+}
 
 use errors::*;
 use clap::{Arg, App, SubCommand, ArgMatches};
@@ -66,7 +77,7 @@ fn run() -> Result<()> {
         .get_matches();
 
     match matches.subcommand() {
-        ("contacts", _) => get_contacts().chain_err(|| "failed to get contacts!"),
+        ("contacts", _) => helpers::get_contacts().chain_err(|| "failed to get contacts!"),
         ("args", Some(m)) => get_args(m).chain_err(|| "failed to parse args!"),
         _ => Ok(()),
     }
@@ -74,13 +85,7 @@ fn run() -> Result<()> {
 
 
 
-fn get_contacts() -> Result<()> {
-    println!("get_contacts");
-    use std::fs::File;
-    // This operation will fail
-    File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
-    Ok(())
-}
+
 
 fn get_args(matches: &ArgMatches) -> Result<()> {
     println!("is foo present? {}", matches.is_present("foo"));
