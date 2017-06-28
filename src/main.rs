@@ -9,44 +9,10 @@
 #[macro_use]
 extern crate error_chain;
 extern crate clap;
+extern crate errorclap;
 
-// We'll put our errors in an `errors` module, and other modules in
-// this crate will `use errors::*;` to get access to everything
-// `error_chain!` creates.
-mod errors {
-    // Create the Error, ErrorKind, ResultExt, and Result types
-    error_chain!{}
-}
-
-mod helpers {
-    use errors::*;
-    use clap::{ArgMatches};
-
-
-    pub fn get_contacts() -> Result<()> {
-        println!("get_contacts");
-        use std::fs::File;
-        // This operation will fail
-        File::open("contacts").chain_err(|| "unable to open ./contacts file")?;
-        Ok(())
-    }
-
-    pub fn get_args(matches: &ArgMatches) -> Result<()> {
-    println!("is foo present? {}", matches.is_present("foo"));
-
-    if let Some(foo) = matches.value_of("foo") {
-        println!("and has a value of {}", foo);
-    } else {
-        bail!("foo must have a value!");
-    }
-
-    println!("value of bar: {}", matches.value_of("bar").unwrap());
-
-    Ok(())
-}
-}
-
-use errors::*;
+use errorclap::errors::*;
+use errorclap::helpers;
 use clap::{Arg, App, SubCommand};
 
 
@@ -75,21 +41,28 @@ fn run() -> Result<()> {
     let matches = App::new("👏 clap yo error chains ⛓")
         .version("1.0")
         .author("booyaa <email@example.com>")
-        .about("Robert'); DROP TABLE STUDENTS; -- seriously you don't clean you input?")
+        .about(
+            "Robert'); DROP TABLE STUDENTS; -- seriously you don't clean you input?",
+        )
         .subcommand(SubCommand::with_name("contacts").about("loads contacts"))
-        .subcommand(SubCommand::with_name("args")
-                            .about("check args")
-                            .arg(Arg::with_name("foo")
-                                .short("f")
-                                .long("foo")                                
-                                .value_name("FOO")
-                                .required(true))
-                            .arg(Arg::with_name("bar")
-                                .short("b")
-                                .long("bar")
-                                .default_value("bar")
-                                .value_name("BAR"))
-                                )
+        .subcommand(
+            SubCommand::with_name("args")
+                .about("check args")
+                .arg(
+                    Arg::with_name("foo")
+                        .short("f")
+                        .long("foo")
+                        .value_name("FOO")
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("bar")
+                        .short("b")
+                        .long("bar")
+                        .default_value("bar")
+                        .value_name("BAR"),
+                ),
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -98,8 +71,3 @@ fn run() -> Result<()> {
         _ => Ok(()),
     }
 }
-
-
-
-
-
