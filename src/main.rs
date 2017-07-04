@@ -6,15 +6,15 @@
 
 // Import the macro. Don't forget to add `error-chain` in your
 // `Cargo.toml`!
-#[macro_use]
 extern crate error_chain;
 extern crate clap;
+
 extern crate errorclap;
+
+use clap::{Arg, App, SubCommand};
 
 use errorclap::errors::*;
 use errorclap::helpers;
-use clap::{Arg, App, SubCommand};
-
 
 fn main() {
     if let Err(ref e) = run() {
@@ -38,6 +38,10 @@ fn main() {
 // `errors` module. It is a typedef of the standard `Result` type
 // for which the error type is always our own `Error`.
 fn run() -> Result<()> {
+    setup()
+}
+
+fn setup() -> Result<()> {
     let matches = App::new("👏 clap yo error chains ⛓")
         .version("1.0")
         .author("booyaa <email@example.com>")
