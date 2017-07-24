@@ -1,5 +1,6 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-    "rust.build_bin": true,
+    "rust.build_lib": false,
+    "rust.workspace_mode": true,
     "rust.unstable_features": true
 }
